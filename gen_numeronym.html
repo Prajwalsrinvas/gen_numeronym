@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numeronym Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fafafa;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .input {
+            transition: border-color 0.2s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2563eb;
+            ring: 2px solid #2563eb;
+        }
+
+        .button {
+            transition: all 0.2s ease;
+        }
+
+        .button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .badge {
+            transition: all 0.2s ease;
+            background: #f3f4f6;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .badge:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 lg:p-24">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useCallback } = React;
+
+        function App() {
+            const [input, setInput] = useState('');
+            const [result, setResult] = useState('');
+            const [error, setError] = useState('');
+
+            const examples = [
+                { original: 'kubernetes', abbreviated: 'k8s' },
+                { original: 'internationalization', abbreviated: 'i18n' },
+                { original: 'Andreessen Horowitz', abbreviated: 'a16z' },
+                { original: 'localization', abbreviated: 'l10n' },
+                { original: 'accessibility', abbreviated: 'a11y' },
+                { original: 'authorization', abbreviated: 'a11n' },
+                { original: 'authentication', abbreviated: 'a12n' },
+                { original: 'optimization', abbreviated: 'o11n' }
+            ];
+
+            const abbreviateWord = useCallback((text) => {
+                setError('');
+
+                if (!text.trim()) {
+                    setError('Please enter text');
+                    return null;
+                }
+
+                const specialCases = {
+                    'andreessen horowitz': 'a16z',
+                    'a16z': 'a16z'
+                };
+
+                const cleanText = text.toLowerCase().trim();
+                
+                if (specialCases[cleanText]) {
+                    return specialCases[cleanText];
+                }
+
+                if (!cleanText.includes(' ')) {
+                    if (cleanText.length <= 3) return cleanText;
+                    
+                    const firstChar = cleanText[0];
+                    const lastChar = cleanText[cleanText.length - 1];
+                    const middleLength = cleanText.length - 2;
+                    
+                    return `${firstChar}${middleLength}${lastChar}`;
+                }
+
+                const words = cleanText.split(' ');
+                const firstWord = words[0];
+                const lastWord = words[words.length - 1];
+                const firstChar = firstWord[0];
+                const lastChar = lastWord[lastWord.length - 1];
+                const totalLength = cleanText.replace(/\s/g, '').length - 2;
+                
+                return `${firstChar}${totalLength}${lastChar}`;
+            }, []);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const abbreviated = abbreviateWord(input);
+                if (abbreviated) {
+                    setResult(abbreviated);
+                }
+            };
+
+            const handleInputChange = (e) => {
+                const newValue = e.target.value;
+                setInput(newValue);
+                setError('');
+                
+                if (newValue.trim()) {
+                    const abbreviated = abbreviateWord(newValue);
+                    if (abbreviated) {
+                        setResult(abbreviated);
+                    }
+                } else {
+                    setResult('');
+                }
+            };
+
+            return (
+                <div className="max-w-md mx-auto card rounded-lg">
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <h1 className="text-2xl font-semibold text-gray-900">
+                                    Numeronym Generator
+                                </h1>
+                                <a 
+                                    href="https://en.m.wikipedia.org/wiki/Numeronym" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                                >
+                                    Learn more
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            </div>
+                            <p className="text-gray-500 text-sm">
+                                Convert words into numeronyms (e.g., kubernetes → k8s)
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="flex gap-2">
+                                <input
+                                    value={input}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter text..."
+                                    className="input flex-1 px-3 py-2 text-sm rounded-md border border-gray-200 placeholder:text-gray-400"
+                                />
+                                <button 
+                                    type="submit"
+                                    disabled={!input.trim()}
+                                    className="button px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Convert
+                                </button>
+                            </div>
+                            
+                            {error && (
+                                <div className="flex items-center gap-2 text-red-500 text-sm">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{error}</span>
+                                </div>
+                            )}
+                            
+                            {result && (
+                                <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <span className="text-2xl font-mono">
+                                        {input.toLowerCase().trim()} → {result}
+                                    </span>
+                                </div>
+                            )}
+                        </form>
+
+                        <div className="mt-6 space-y-2">
+                            <p className="text-sm text-gray-500">Click an example to try:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {examples.map((example) => (
+                                    <button
+                                        key={example.original}
+                                        onClick={() => {
+                                            setInput(example.original);
+                                            setResult(example.abbreviated);
+                                        }}
+                                        className="badge px-2.5 py-1 text-sm rounded-md hover:bg-gray-200 cursor-pointer"
+                                    >
+                                        {example.original} → {example.abbreviated}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
