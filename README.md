@@ -9,3 +9,7 @@ This tool provides:
 - Special case handling (e.g., "Andreessen Horowitz" → "a16z")
 - Modern, responsive UI
 
+Fun fact:
+- I created this entirely on my phone, used the claude mobile app, iterated over a few versions and previewed it using the artifacts feature.
+- Then signed up on render, looked up steps to deploy a static site and deployed it.
+- Then created a quick readme using claude, and added a screenshot.
